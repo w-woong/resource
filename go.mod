@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-wonk/si v0.2.12
 	github.com/gorilla/mux v1.8.0
-	github.com/w-woong/common v0.0.82
+	github.com/w-woong/common v0.0.83
 	go.elastic.co/apm/module/apmgormv2/v2 v2.2.0
 	go.elastic.co/apm/v2 v2.2.0
 	gorm.io/gorm v1.24.5
