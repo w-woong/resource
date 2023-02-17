@@ -6,13 +6,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/w-woong/common"
+	"github.com/w-woong/common/port"
 	commonport "github.com/w-woong/common/port"
 
 	"github.com/w-woong/resource/delivery"
 )
 
 func ResourceRoute(router *mux.Router, conf common.ConfigHttp,
-	validator commonport.IDTokenValidators, userSvc commonport.UserSvc) *delivery.ResourceHttpHandler {
+	tokenCookie port.TokenCookie, parser commonport.IDTokenParser,
+	userSvc commonport.UserSvc) *delivery.ResourceHttpHandler {
 
 	handler := delivery.NewResourceHttpHandler(time.Duration(conf.Timeout) * time.Second)
 

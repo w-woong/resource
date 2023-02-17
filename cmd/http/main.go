@@ -159,33 +159,28 @@ func main() {
 
 	// usc := usecase.NewCartUsc(txBeginner, isolationLvl, cartRepo, cartProductRepo)
 
-	// oauth2
-	idTokenValidators := make(commonport.IDTokenValidators)
-	for _, v := range conf.Client.Oauth2.IDTokenValidators {
-		if v.Type == "jwks" {
-			jwksUrl, err := utils.GetJwksUrl(v.OpenIDConfUrl)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
-			jwksStore, err := utils.NewJwksCache(jwksUrl)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
-			validator := commonadapter.NewJwksIDTokenValidator(jwksStore, v.Token.TokenSourceKeyName, v.Token.IDKeyName, v.Token.IDTokenKeyName)
-			idTokenValidators[v.Token.Source] = validator
+	var idTokenParser commonport.IDTokenParser
+	for _, v := range conf.Client.OAuth2 {
+		jwksUrl, err := utils.GetJwksUrl(v.OpenIDConfUrl)
+		if err != nil {
+			logger.Error(err.Error())
+			os.Exit(1)
 		}
+
+		jwksStore, err := utils.NewJwksCache(jwksUrl)
+		if err != nil {
+			logger.Error(err.Error())
+			os.Exit(1)
+		}
+		idTokenParser = commonadapter.NewJwksIDTokenParser(jwksStore)
 	}
+	tokenCookie := commonadapter.NewTokenCookie(1*time.Hour, conf.Client.IDTokenCookie)
 
 	var userSvc commonport.UserSvc
 	if conf.Client.UserHttp.Url != "" {
 		userSvc = commonadapter.NewUserHttp(sihttp.DefaultInsecureClient(),
 			// conf.Client.Oauth2.Token.Source,
-			conf.Client.UserHttp.Url,
-			conf.Client.UserHttp.BearerToken,
-			conf.Client.Oauth2.Token.TokenSourceKeyName,
-			conf.Client.Oauth2.Token.IDKeyName, conf.Client.Oauth2.Token.IDTokenKeyName)
+			conf.Client.UserHttp.Url)
 	} else if conf.Client.UserGrpc.Addr != "" {
 		conn, err := wrapper.NewGrpcClient(conf.Client.UserGrpc, false)
 		if err != nil {
@@ -199,7 +194,7 @@ func main() {
 
 	// http route
 	router := mux.NewRouter()
-	route.ResourceRoute(router, conf.Server.Http, idTokenValidators, userSvc)
+	route.ResourceRoute(router, conf.Server.Http, tokenCookie, idTokenParser, userSvc)
 
 	// http server
 	tlsConfig := sihttp.CreateTLSConfigMinTls(tls.VersionTLS12)
