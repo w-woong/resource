@@ -13,7 +13,7 @@ import (
 )
 
 func ResourceRoute(router *mux.Router, conf common.ConfigHttp,
-	tokenCookie port.TokenCookie, parser commonport.IDTokenParser,
+	tokenCookie port.Cookie, parser commonport.IDTokenParser,
 	userSvc commonport.UserSvc) *delivery.ResourceHttpHandler {
 
 	handler := delivery.NewResourceHttpHandler(time.Duration(conf.Timeout) * time.Second)

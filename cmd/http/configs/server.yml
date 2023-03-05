@@ -34,7 +34,13 @@ server:
     conn_max_lifetime_in_min: 15
 
 client:
-  id_token_cookie: 'id_token'
+  cookies:
+    id_token:
+      name: 'id_token'
+      expires: 604800
+      same_site: 'strict'
+      domain: 'my-domain.com'
+      path: '/'
   oauth2:
     integrated:
       openid_conf_url: 'https://127.0.0.1:5558/.well-known/openid-configuration'
@@ -65,4 +71,5 @@ client:
       }
     ca_cert_pem: './certs/server.crt'
     cert_server_name: 'localhost'
-    dial_block: true
+    dial_block: false
+    dial_timeout: 3
